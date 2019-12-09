@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdint.h>
 #include <SDL2/SDL.h>
 #include <stdio.h>
 
@@ -61,11 +62,17 @@ void process_input(struct game *game, struct snake *snake){
 			game->running = false;
 		}
 		if (ev.type == SDL_KEYDOWN){
+			if (ev.key.keysym.sym == SDLK_LEFT){
+				snake->dir = LEFT;
+			}
 			if (ev.key.keysym.sym == SDLK_RIGHT){
 				snake->dir = RIGHT;
 			}
 			if (ev.key.keysym.sym == SDLK_UP){
 				snake->dir = UP;
+			}
+			if (ev.key.keysym.sym == SDLK_DOWN){
+				snake->dir = DOWN;
 			}
 		}
 	}
@@ -85,13 +92,12 @@ void tick(uint8_t grid[GRIDSIZE][GRIDSIZE], struct snake *snake, struct game *ga
 		}
 	}
 
-
 	if (snake->headx < 0 || snake->headx >= GRIDSIZE || snake->heady < 0 || snake->heady >= GRIDSIZE ){
 		game->running = false;
 		return;
 	}
 
-	grid[snake->headx][snake->heady] = snake->length;
+	grid[snake->heady][snake->headx] = snake->length;
 	
 	snake->headx += (snake->dir == RIGHT);
 	snake->headx -= (snake->dir == LEFT);
@@ -115,8 +121,7 @@ int main(void){
 		process_input(&game, &snake);
 		tick(grid, &snake, &game);
 		render(&game, grid);
-		SDL_Delay(400);
-		printf("%d, %d\n", snake.headx, snake.heady);
+		SDL_Delay(250);
 	}
 
 	quit(&game);
