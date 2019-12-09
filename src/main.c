@@ -1,11 +1,16 @@
 #include <stdbool.h>
 #include <SDL2/SDL.h>
+#include <stdio.h>
 
 #define SQSIZE 32
 #define WINWIDTH 512
 #define WINHEIGHT 512
 #define GRIDSIZE 16
 #define MARGIN 1
+
+enum direction{
+	LEFT, RIGHT, UP, DOWN
+};
 
 struct game{
 	SDL_Window *window;
@@ -16,6 +21,8 @@ struct game{
 struct snake{
 	int headx;
 	int heady;
+	enum direction dir;
+	int length;
 };
 
 void init(struct game *game){
@@ -28,7 +35,7 @@ void init(struct game *game){
 	game->running = true;
 }
 
-void render(struct game *game, bool grid[GRIDSIZE][GRIDSIZE]){
+void render(struct game *game, uint8_t grid[GRIDSIZE][GRIDSIZE]){
 	SDL_SetRenderDrawColor(game->rend, 0xff, 0xff, 0xff, 0xff);
 	SDL_RenderClear(game->rend);
 	SDL_SetRenderDrawColor(game->rend, 0x4f, 0x5f, 0x7f, 0xff);
@@ -47,11 +54,19 @@ void render(struct game *game, bool grid[GRIDSIZE][GRIDSIZE]){
 	SDL_RenderPresent(game->rend);
 }
 
-void process_input(struct game *game){
+void process_input(struct game *game, struct snake *snake){
 	SDL_Event ev;
 	while (SDL_PollEvent(&ev)){
 		if (ev.type == SDL_QUIT){
 			game->running = false;
+		}
+		if (ev.type == SDL_KEYDOWN){
+			if (ev.key.keysym.sym == SDLK_RIGHT){
+				snake->dir = RIGHT;
+			}
+			if (ev.key.keysym.sym == SDLK_UP){
+				snake->dir = UP;
+			}
 		}
 	}
 }
@@ -62,6 +77,28 @@ void quit(struct game *game){
 	SDL_Quit();
 }
 
+void tick(uint8_t grid[GRIDSIZE][GRIDSIZE], struct snake *snake, struct game *game){
+	for (int i = 0; i < GRIDSIZE; i++){
+		for (int j = 0; j < GRIDSIZE; j++){
+			if(grid[i][j])
+				grid[i][j]--;
+		}
+	}
+
+
+	if (snake->headx < 0 || snake->headx >= GRIDSIZE || snake->heady < 0 || snake->heady >= GRIDSIZE ){
+		game->running = false;
+		return;
+	}
+
+	grid[snake->headx][snake->heady] = snake->length;
+	
+	snake->headx += (snake->dir == RIGHT);
+	snake->headx -= (snake->dir == LEFT);
+	snake->heady -= (snake->dir == UP);
+	snake->heady += (snake->dir == DOWN);
+}
+
 int main(void){
 	struct game game;
 	init(&game);
@@ -69,31 +106,17 @@ int main(void){
 	struct snake snake;
 	snake.headx = GRIDSIZE / 2;
 	snake.heady = GRIDSIZE / 2;
+	snake.dir = RIGHT;
+	snake.length = 3;
 
-	bool grid[GRIDSIZE][GRIDSIZE] =
-	{
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	}; 
+	uint8_t grid[GRIDSIZE][GRIDSIZE] = {0}; 
 
 	while (game.running){
-		process_input(&game);
+		process_input(&game, &snake);
+		tick(grid, &snake, &game);
 		render(&game, grid);
-		SDL_Delay(20);
+		SDL_Delay(400);
+		printf("%d, %d\n", snake.headx, snake.heady);
 	}
 
 	quit(&game);
