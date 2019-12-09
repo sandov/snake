@@ -1,7 +1,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <SDL2/SDL.h>
-#include <stdio.h>
 
 #define SQSIZE 32
 #define WINWIDTH 512
