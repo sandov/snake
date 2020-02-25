@@ -28,7 +28,7 @@ struct snake{
 void init(struct game *game){
 	game->window = SDL_CreateWindow("Snake", SDL_WINDOWPOS_UNDEFINED,
 	                                SDL_WINDOWPOS_UNDEFINED, WINWIDTH,
-	                                512, SDL_WINDOW_SHOWN);
+	                                WINHEIGHT, SDL_WINDOW_SHOWN);
 
 	game->rend = SDL_CreateRenderer(game->window, -1, 0);
 
