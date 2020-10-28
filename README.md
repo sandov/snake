@@ -1,6 +1,6 @@
 # Snake
 
-Implementing the classical snake game in C using the SDL2 library.
+Implementing the classic snake game in C using the SDL2 library.
 Just a prototype. I'm not even sure if I'll implement it completely.
 
 ## Current state:
