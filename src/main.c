@@ -12,20 +12,25 @@ enum direction{
 	LEFT, RIGHT, UP, DOWN
 };
 
-struct game{
+typedef struct{
 	SDL_Window *window;
 	SDL_Renderer *rend;
 	bool running;
-};
+} game;
 
-struct snake{
+typedef struct{
 	int headx;
 	int heady;
 	enum direction dir;
 	int length;
-};
+} snake;
 
-void init(struct game *game){
+typedef struct{
+	int posx;
+	int posy;
+} apple;
+
+void init(game *game){
 	game->window = SDL_CreateWindow("Snake", SDL_WINDOWPOS_UNDEFINED,
 	                                SDL_WINDOWPOS_UNDEFINED, WINWIDTH,
 	                                WINHEIGHT, SDL_WINDOW_SHOWN);
@@ -35,7 +40,7 @@ void init(struct game *game){
 	game->running = true;
 }
 
-void render(struct game *game, uint8_t grid[GRIDSIZE][GRIDSIZE]){
+void render(game *game, uint8_t grid[GRIDSIZE][GRIDSIZE]){
 	SDL_SetRenderDrawColor(game->rend, 0xff, 0xff, 0xff, 0xff);
 	SDL_RenderClear(game->rend);
 	SDL_SetRenderDrawColor(game->rend, 0x4f, 0x5f, 0x7f, 0xff);
@@ -54,7 +59,7 @@ void render(struct game *game, uint8_t grid[GRIDSIZE][GRIDSIZE]){
 	SDL_RenderPresent(game->rend);
 }
 
-void process_input(struct game *game, struct snake *snake){
+void process_input(game *game, snake *snake){
 	SDL_Event ev;
 	while (SDL_PollEvent(&ev)){
 		if (ev.type == SDL_QUIT){
@@ -77,13 +82,13 @@ void process_input(struct game *game, struct snake *snake){
 	}
 }
 
-void quit(struct game *game){
+void quit(game *game){
 	SDL_DestroyRenderer(game->rend);
 	SDL_DestroyWindow(game->window);
 	SDL_Quit();
 }
 
-void tick(uint8_t grid[GRIDSIZE][GRIDSIZE], struct snake *snake, struct game *game){
+void tick(uint8_t grid[GRIDSIZE][GRIDSIZE], snake *snake, game *game){
 	for (int i = 0; i < GRIDSIZE; i++){
 		for (int j = 0; j < GRIDSIZE; j++){
 			if(grid[i][j])
@@ -105,10 +110,10 @@ void tick(uint8_t grid[GRIDSIZE][GRIDSIZE], struct snake *snake, struct game *ga
 }
 
 int main(void){
-	struct game game;
+	game game;
 	init(&game);
 
-	struct snake snake;
+	snake snake;
 	snake.headx = GRIDSIZE / 2;
 	snake.heady = GRIDSIZE / 2;
 	snake.dir = RIGHT;
